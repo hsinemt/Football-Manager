@@ -52,6 +52,16 @@ public class PlayerController {
         return 0.0;
     }
 
+    @GetMapping("/top")
+    public List<Player> getTopPlayers() {
+        return playerService.getTopPlayers();
+    }
+
+    @GetMapping("/filter/matchs")
+    public List<Player> getPlayersWithMinMatchs(@RequestParam int minMatchs) {
+        return playerService.getPlayersWithMinMatchs(minMatchs);
+    }
+
     @GetMapping("/search")
     public List<Player> searchPlayers(
             @RequestParam(required = false) String nom,
