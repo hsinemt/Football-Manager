@@ -1,0 +1,44 @@
+# === Java / Maven / Spring Boot ===
+target/
+*.class
+*.jar
+*.war
+*.ear
+
+# === IntelliJ IDEA ===
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# === Logs ===
+*.log
+logs/
+spring.log
+
+# === OS junk ===
+.DS_Store
+Thumbs.db
+
+# === Environment files ===
+.env
+*.env
+
+# === Docker ===
+docker-compose.override.yml
+Dockerfile.*
+.dockerignore
+
+# === MySQL data (DO NOT TRACK THESE) ===
+mysql-data/
+**/mysql.sock
+**/*.cnf
+**/*.index
+**/ib*
+
+# === VSCode (if ever used) ===
+.vscode/
+
+# === Git ===
+.gitattributes

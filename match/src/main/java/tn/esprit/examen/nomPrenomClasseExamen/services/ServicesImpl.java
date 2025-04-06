@@ -1,0 +1,44 @@
+package tn.esprit.examen.nomPrenomClasseExamen.services;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import tn.esprit.examen.nomPrenomClasseExamen.entities.Equipe;
+import tn.esprit.examen.nomPrenomClasseExamen.repositories.IEquipeRepository;
+
+import java.util.List;
+
+@Slf4j
+@RequiredArgsConstructor
+@Service
+public class ServicesImpl implements IServices {
+
+    @Autowired
+    private IEquipeRepository equipeRepository;
+
+
+    @Override
+    public Equipe addEquipe(Equipe equipe) {
+        return equipeRepository.save(equipe);
+    }
+
+    @Override
+    public Equipe updateEquipe(Equipe equipe) {return equipeRepository.save(equipe);}
+
+    @Override
+    public void deleteEquipe(Long id) {
+        equipeRepository.deleteById(id);
+    }
+
+    @Override
+    public Equipe getEquipeById(Long id) {
+        return equipeRepository.findById(id).orElse(null);
+    }
+
+    @Override
+    public List<Equipe> getAllEquipes() {
+        return equipeRepository.findAll();
+    }
+}

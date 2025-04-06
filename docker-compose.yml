@@ -1,0 +1,52 @@
+services:
+
+  match:
+    build: ./match
+    image: eyaab/match:1.0
+    container_name: team
+    ports:
+      - "8089:8089"
+    depends_on:
+      - db
+      - eureka
+    environment:
+      - eureka.client.service-url.defaultZone = http://eureka:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/match?createDatabaseIfNotExist=true&useSSL=false
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+
+  eureka:
+    build: ./eureka
+    image: eyaab/eureka:1.0
+    container_name: eureka
+    ports:
+      - "8761:8761"
+    environment:
+      - eureka.client.service-url.defaultZone = http://eureka:8761/eureka/
+
+  apigetway:
+    build: ./apigateway
+    image: eyaab/apigetway:1.0
+    container_name: apigetway
+    depends_on:
+      - eureka
+      - match
+    ports:
+      - "8077:8077"
+    environment:
+      - eureka.client.service-url.defaultZone = http://eureka:8761/eureka/
+
+  db:
+    image: mysql:8.0  # Utilisation de l'image officielle MySQL
+    container_name: db
+    command: --default-authentication-plugin=mysql_native_password  # Configurer le plugin d'authentification
+    ports:
+      - "3306:3306"  # Mapper le port 3306 du container au port 3306 sur votre machine hôte
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=root  # Définir le mot de passe root de MySQL
+      - MYSQL_DATABASE=mydb  # Définir une base de données à créer par défaut
+    volumes:
+      - ./mysql-data:/var/lib/mysql  # Monter un volume pour persister les données MySQL
+
+
