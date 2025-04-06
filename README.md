@@ -37,6 +37,8 @@ Ce projet fait partie d'une architecture **microservices** développée avec **S
 | GET    | `/players/search`              | Recherche filtrée                        |
 | GET    | `/players/sport`               | Citation sportive aléatoire              |
 | GET    | `/players/motivation`          | Citation motivationnelle aléatoire       |
+| GET    | `/players/top`                 | Classement des joueurs les plus performants  |
+| GET    | `/players/filter/matchs`       | Joueurs ayant disputé un nombre minimum de matchs |
 
 ---
 
