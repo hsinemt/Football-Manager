@@ -56,5 +56,26 @@ public class PlayerService {
         }
         return playerRepository.findAll();
     }
+    public List<Player> getTopPlayers() {
+        List<Player> players = playerRepository.findAll();
+        return players.stream()
+                .sorted((p1, p2) -> Double.compare(
+                        calculerScoreGlobal(p2),
+                        calculerScoreGlobal(p1)))
+                .toList();
+    }
+
+    public double calculerScoreGlobal(Player player) {
+        return player.getButs() * 2
+                + player.getPassesDecisives()
+                - player.getCartonsJaunes() * 0.5
+                - player.getCartonsRouges();
+    }
+    public List<Player> getPlayersWithMinMatchs(int minMatchs) {
+        return playerRepository.findAll()
+                .stream()
+                .filter(p -> p.getMatchsJoues() >= minMatchs)
+                .toList();
+    }
 
 }
