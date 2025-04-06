@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  eureka:
+    build: ./eureka-server
+    image: azizhamed/eureka:1.0
+    container_name: eureka
+    ports:
+      - "8761:8761"
+    environment:
+       - eureka.client.service-url.defaultZone=http://eureka:8761/eureka/
+     
+
+  apigetway:
+    build: ./api-gateway   
+    image: azizhamed/apigetway:1.0
+    container_name: apigetway
+    depends_on:
+      - eureka
+      - microservice
+    ports:
+      - "8086:8086"
+    environment:
+      - eureka.client.service-url.defaultZone=http://eureka:8761/eureka/
+      
+  microservice:
+    build: ./microservice
+    image: azizhamed/microservice:1.0
+    container_name: player
+    depends_on:
+      - eureka
+    ports:
+      - "8077:8077"
+    environment:
+      - eureka.client.service-url.defaultZone=http://eureka:8761/eureka/
+    volumes:
+      - ./microservice/database:/opt/app/database
+
