@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 import tn.esprit.examen.nomPrenomClasseExamen.entities.Equipe;
 import tn.esprit.examen.nomPrenomClasseExamen.repositories.IEquipeRepository;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -41,4 +43,14 @@ public class ServicesImpl implements IServices {
     public List<Equipe> getAllEquipes() {
         return equipeRepository.findAll();
     }
+
+    @Override
+    public List<Equipe> getEquipesSortedByVictoires() {
+        List<Equipe> equipes = equipeRepository.findAll();
+        equipes.sort(
+                Comparator.comparing(Equipe::getVictoires, Comparator.reverseOrder())
+        );
+        return equipes;
+    }
+
 }

@@ -38,4 +38,13 @@ public class Equipe implements Serializable {
     public void setId(Long id) {
         this.id = id;
     }
+
+    public Integer getVictoires() {
+        return victoires;
+    }
+
+    public Integer getButs_marques() {
+        return buts_marques;
+    }
+
 }

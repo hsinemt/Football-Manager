@@ -45,4 +45,9 @@ public class EquipeRestController {
     public List<Equipe> getAllEquipes() {
         return equipeService.getAllEquipes();
     }
+
+    @GetMapping("/sorted")
+    public List<Equipe> getEquipesSortedByVictoires() {
+        return equipeService.getEquipesSortedByVictoires();
+    }
 }
