@@ -66,4 +66,25 @@ pie
     "Spring Boot" : 45
     "Spring Security" : 30
     "Spring Data JPA" : 15
+<<<<<<< HEAD
     "TOTP" : 10
+=======
+    "TOTP" : 10
+👁️ Reconnaissance Faciale
+Enregistrement visage via /face-auth/register
+
+Connexion via webcam /face-auth/verify
+
+Validation IA Python
+
+🔒 Mesures de Sécurité
+🔄 Rotation automatique des secrets 2FA
+
+🛡️ Chiffrement des données biométriques
+
+⏲️ Expiration courte des tokens
+
+📊 Détection d'activité suspecte
+
+🧪 Tests de pénétration inclus
+>>>>>>> 5fc56d734e6d4042ae5cf773d0ba75405b0f790b
