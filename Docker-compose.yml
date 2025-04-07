@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  eureka:
+    build: ./FootballEureka
+    image: hsinemt/eureka:1.0
+    container_name: eureka
+    ports:
+      - "8761:8761"
+    environment:
+      - eureka.client.service-url.defaultZone=http://eureka:8761/eureka/
+
+  api-gateway:
+    build: ./api-gateway
+    image: hsineapi/apigateway:1.0
+    container_name: apigateway
+    ports:
+      - "8086:8086"
+    depends_on:
+      - eureka
+    environment:
+      - eureka.client.service-url.defaultZone=http://eureka:8761/eureka/
+
+  Football:
+    build: ./Football
+    image: hsineuser/football:1.0
+    container_name: football
+    ports:
+      - "8079:8079"
+    depends_on:
+      - eureka
+    environment:
+      - eureka.client.service-url.defaultZone=http://eureka:8761/eureka/
+    volumes:
+      - ./Football/database:/opt/app/database
