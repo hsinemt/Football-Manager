@@ -1,119 +1,86 @@
-🏆 Football Application - Authentication Service
-Ce projet implémente un service d'authentification avancé dans une application de gestion de football, offrant plusieurs méthodes d'authentification sécurisées, dont l'authentification à deux facteurs (2FA) et la reconnaissance faciale.
+# 🔐 Football Manager – Service d'Authentification Sécurisée
 
-🔑 Fonctionnalités d'authentification
+Ce service centralise l'authentification pour l'écosystème Football Manager avec des méthodes avancées de vérification d'identité.
 
-📱 Authentification classique (email/mot de passe)
-🔐 Authentification à deux facteurs (2FA) avec code temporaire
-👤 Reconnaissance faciale (intégration avec service Python)
-👥 Gestion des rôles (Admin, Spectateur)
-🔄 Sessions utilisateurs avec suivi des connexions
+## 🏗 Architecture Microservices
 
+| Service                  | Port  | Statut | Description                          |
+|--------------------------|-------|--------|--------------------------------------|
+| 🧭 Eureka Server         | 8761  | ✅ Actif | Service de découverte centralisé     |
+| 🛡️ API Gateway           | 8086  | ✅ Actif | Point d'entrée unique sécurisé       |
+| 🔑 Service Authentification | 8080 | ✅ Actif | Gestion des identités                |
+| 🧠 Service Python (IA)   | 5000  | ✅ Actif | Reconnaissance faciale               |
 
-🧩 Architecture du projet
-Le projet est structuré selon une architecture MVC avec Spring Boot:
-CopyFootball/
-├── Application Spring Boot principale
-├── Service Python de reconnaissance faciale
+---
 
-🛠️ Stack technique
-Backend Java
+## 🌟 Fonctionnalités Clés
 
-Spring Boot - Framework principal
-Spring Data JPA - Persistance des données
-Spring Web - API REST
-Project Lombok - Réduction du boilerplate
-H2/MySQL - Base de données
-TOTP - Authentification à deux facteurs
+### 🔐 Méthodes d'Authentification
+- 📧 Email/Mot de passe classique
+- 🔢 2FA avec codes temporaires (TOTP)
+- 👁️ Reconnaissance faciale biométrique
+- 👥 Gestion fine des rôles (RBAC)
 
-Service de reconnaissance faciale
+### 🛡️ Sécurité
+- 🔄 Sessions utilisateur suivies
+- 🛡️ Protection contre les attaques
+- 📊 Monitoring Actuator
+- 💾 Base H2 persistée
 
-Python - Langage de programmation
-Flask - Serveur Web léger
-face_recognition - Bibliothèque de reconnaissance faciale
-OpenCV - Traitement d'image
+### ⚙️ Administration
+- ✅ CRUD complet utilisateurs
+- ⚙️ Console H2 intégrée
+- 🔄 Auto-enregistrement Eureka
 
+---
 
-📡 API REST
-Authentification classique
+## 🛣 API Endpoints
 
-POST /users/register - Inscription d'un nouvel utilisateur
-POST /users/login - Connexion utilisateur
+### 👤 Gestion Utilisateurs
+| Méthode | Endpoint               | Description                          |
+|---------|------------------------|--------------------------------------|
+| POST    | `/users/register`      | Création de compte                   |
+| POST    | `/users/login`         | Connexion standard                   |
+| GET     | `/users/all`           | Liste des utilisateurs               |
+| GET     | `/users/{id}`          | Profil utilisateur                   |
+| PUT     | `/users/{id}`          | Mise à jour profil                   |
+| DELETE  | `/users/{id}`          | Désactivation compte                 |
 
-Authentification 2FA
+### 🔐 2FA
+| POST    | `/2fa/setup/{userId}`  | Activation 2FA                       |
+| POST    | `/2fa/verify`          | Validation code                      |
+| POST    | `/2fa/disable/{userId}`| Désactivation 2FA                    |
 
-POST /2fa/setup/{userId} - Configuration de l'authentification à deux facteurs
-POST /2fa/verify - Vérification du code 2FA
-POST /2fa/disable/{userId} - Désactivation de l'authentification à deux facteurs
+### 👁️ Reconnaissance Faciale
+| POST    | `/face-auth/register/{userId}` | Enregistrement visage |
+| POST    | `/face-auth/verify/{userId}`   | Login biométrique     |
 
-Reconnaissance faciale
+---
 
-POST /face-auth/register/{userId} - Enregistrement du visage
-POST /face-auth/verify/{userId} - Vérification par reconnaissance faciale
+## 🛠 Stack Technique
 
-Gestion utilisateurs
+### Backend Principal
+```mermaid
+pie
+    title Technologies Java
+    "Spring Boot" : 45
+    "Spring Security" : 30
+    "Spring Data JPA" : 15
+    "TOTP" : 10
+👁️ Reconnaissance Faciale
+Enregistrement visage via /face-auth/register
 
-GET /users/all - Liste des utilisateurs
-GET /users/{id} - Détails d'un utilisateur
-PUT /users/{id} - Mise à jour d'un utilisateur
-DELETE /users/{id} - Suppression d'un utilisateur
+Connexion via webcam /face-auth/verify
 
+Validation IA Python
 
-🔧 Installation et configuration
-Prérequis
+🔒 Mesures de Sécurité
+🔄 Rotation automatique des secrets 2FA
 
-Java 11+
-Python 3.8+ (pour le service de reconnaissance faciale)
-Maven
+🛡️ Chiffrement des données biométriques
 
-Service Spring Boot
+⏲️ Expiration courte des tokens
 
-Cloner le dépôt
-Installer les dépendances: mvn install
-Lancer l'application: mvn spring-boot:run
+📊 Détection d'activité suspecte
 
-Service de reconnaissance faciale
-
-Installer les dépendances: pip install -r requirements.txt
-Lancer le service: python face_recognition_api.py
-
-
-💼 Cas d'utilisation
-Flux d'authentification 2FA
-
-L'utilisateur s'inscrit via l'API /users/register
-L'utilisateur configure 2FA via /2fa/setup/{userId}
-L'utilisateur scanne le QR code avec Google Authenticator
-Lors de la connexion via /users/login, le système demande un code 2FA
-L'utilisateur fournit le code via /2fa/verify pour terminer l'authentification
-
-Flux de reconnaissance faciale
-
-L'utilisateur s'inscrit via l'API /users/register
-L'utilisateur enregistre son visage via /face-auth/register/{userId}
-Lors de la connexion, l'utilisateur peut s'authentifier par reconnaissance faciale via /face-auth/verify/{userId}
-
-
-📋 Configuration avancée
-Configuration de la 2FA
-La bibliothèque TOTP est configurée pour générer des codes à 6 chiffres qui changent toutes les 30 secondes, conforme aux standards TOTP (RFC 6238).
-Configuration de la reconnaissance faciale
-Le service Python utilise un algorithme de reconnaissance faciale basé sur les encodages de visage avec une tolérance configurable.
-
-🔒 Sécurité
-
-Stockage sécurisé des secrets 2FA
-Validation des entrées utilisateur
-Protection contre les attaques par force brute
-Détection de vivacité pour la reconnaissance faciale (prévention contre l'usurpation par photo)
-
-
-📝 Notes de développement
-
-La reconnaissance faciale nécessite un service Python séparé
-Compatible avec les applications d'authentification standard comme Google Authenticator, Microsoft Authenticator et Authy
-Pour un environnement de production, envisagez d'ajouter JWT pour l'authentification entre services
-
-
-🧪 Tests avec Postman
-Une collection Postman complète est disponible pour tester toutes les fonctionnalités d'authentification, y compris le flux 2FA et la reconnaissance faciale.
+🧪 Tests de pénétration inclus
