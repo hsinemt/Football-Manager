@@ -1,4 +1,4 @@
-# 🔐 Football Manager – Service d'Authentification Sécurisée
+# 🔐 Football Manager – User Service d'Authentification Sécurisée et Weather API
 
 Ce service centralise l'authentification pour l'écosystème Football Manager avec des méthodes avancées de vérification d'identité.
 
@@ -8,8 +8,8 @@ Ce service centralise l'authentification pour l'écosystème Football Manager av
 |--------------------------|-------|--------|--------------------------------------|
 | 🧭 Eureka Server         | 8761  | ✅ Actif | Service de découverte centralisé     |
 | 🛡️ API Gateway           | 8086  | ✅ Actif | Point d'entrée unique sécurisé       |
-| 🔑 Service Authentification | 8080 | ✅ Actif | Gestion des identités                |
-| 🧠 Service Python (IA)   | 5000  | ✅ Actif | Reconnaissance faciale               |
+| 🔑 Service Authentification | 8079 | ✅ Actif | Gestion des identités                |
+
 
 ---
 
@@ -52,10 +52,8 @@ Ce service centralise l'authentification pour l'écosystème Football Manager av
 | POST    | `/2fa/disable/{userId}`| Désactivation 2FA                    |
 
 ### 👁️ Reconnaissance Faciale
-| POST    | `/face-auth/register/{userId}` | Enregistrement visage |
-| POST    | `/face-auth/verify/{userId}`   | Login biométrique     |
+| GET    | `/weather/realtime	` | city, country (required) |
 
----
 
 ## 🛠 Stack Technique
 
@@ -70,21 +68,5 @@ pie
     "TOTP" : 10
 =======
     "TOTP" : 10
-👁️ Reconnaissance Faciale
-Enregistrement visage via /face-auth/register
-
-Connexion via webcam /face-auth/verify
-
-Validation IA Python
-
-🔒 Mesures de Sécurité
-🔄 Rotation automatique des secrets 2FA
-
-🛡️ Chiffrement des données biométriques
-
-⏲️ Expiration courte des tokens
 
 📊 Détection d'activité suspecte
-
-🧪 Tests de pénétration inclus
->>>>>>> 5fc56d734e6d4042ae5cf773d0ba75405b0f790b
