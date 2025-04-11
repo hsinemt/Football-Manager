@@ -46,11 +46,10 @@ public class ServicesImpl implements IServices {
 
     @Override
     public List<Equipe> getEquipesSortedByVictoires() {
-        List<Equipe> equipes = equipeRepository.findAll();
-        equipes.sort(
-                Comparator.comparing(Equipe::getVictoires, Comparator.reverseOrder())
-        );
-        return equipes;
+        return equipeRepository.findAll()
+                .stream()
+                .sorted(Comparator.comparing(Equipe::getVictoires).reversed())
+                .collect(Collectors.toList());
     }
 
 }

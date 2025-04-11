@@ -31,20 +31,6 @@ public class Equipe implements Serializable {
     private Integer buts_marques;
     private Integer buts_encaissees;
 
-    public Long getId() {
-        return id;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Integer getVictoires() {
-        return victoires;
-    }
-
-    public Integer getButs_marques() {
-        return buts_marques;
-    }
 
 }

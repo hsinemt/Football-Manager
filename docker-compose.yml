@@ -14,6 +14,8 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/match?createDatabaseIfNotExist=true&useSSL=false
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=root
+      - EUREKA_CLIENT_REGISTER-WITH-EUREKA=true
+      - EUREKA_CLIENT_FETCH-REGISTRY=true
 
   eureka:
     build: ./eureka

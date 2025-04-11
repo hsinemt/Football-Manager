@@ -1,5 +1,6 @@
 package tn.esprit.examen.nomPrenomClasseExamen.controllers;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import tn.esprit.examen.nomPrenomClasseExamen.entities.Equipe;
 import tn.esprit.examen.nomPrenomClasseExamen.services.IServices;
@@ -16,10 +17,7 @@ public class EquipeRestController {
         this.equipeService = equipeService;
     }
 
-    @GetMapping("/")
-    public String hello() {
-        return "Service 'match' is running!";
-    }
+
     @PostMapping
     public Equipe addEquipe(@RequestBody Equipe equipe) {
         return equipeService.addEquipe(equipe);
@@ -47,7 +45,7 @@ public class EquipeRestController {
     }
 
     @GetMapping("/sorted")
-    public List<Equipe> getEquipesSortedByVictoires() {
-        return equipeService.getEquipesSortedByVictoires();
+    public ResponseEntity<List<Equipe>> getEquipesSortedByVictoires() {
+        return ResponseEntity.ok(equipeService.getEquipesSortedByVictoires());
     }
 }
