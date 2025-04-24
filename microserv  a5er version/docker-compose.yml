@@ -1,0 +1,107 @@
+version: '3.8'
+
+services:
+  # Eureka Server (Service Discovery)
+  eureka-server:
+    build:
+      context: ./eureka-server 
+      dockerfile: Dockerfile
+    image: firasbessalah/eureka:latest
+    container_name: eureka-server
+    ports:
+      - "8761:8761"  # Expose Eureka dashboard on port 8761
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - EUREKA_CLIENT_REGISTER-WITH-EUREKA=false
+      - EUREKA_CLIENT_FETCH-REGISTRY=false  # Standalone Eureka server
+    networks:
+      - microservices-net
+
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=match
+      - MYSQL_ROOT_HOST=%
+    command: 
+      - --default-authentication-plugin=mysql_native_password  # Use native password auth
+      - --bind-address=0.0.0.0    
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -uroot -proot"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    networks:
+      - microservices-net
+    volumes:
+      - db_mysql:/var/lib/mysql  # Persist database data between container restarts
+
+  # phpMyAdmin (Database Management Tool)
+  phpmyadmin:
+    container_name: ms_phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    depends_on:
+      - db
+    environment:
+      - PMA_HOST=db
+      - PMA_PORT=3306
+      - PMA_ARBITRARY=1
+      - APACHE_SERVER_NAME=localhost  
+    ports:
+      - "8086:80"  # Expose phpMyAdmin on port 8086
+    restart: unless-stopped
+    networks:
+      - microservices-net
+
+  # Microservice (Your Application Service)
+  microservice:
+    build:
+      context: ./microservice
+      dockerfile: Dockerfile
+    image: firasbessalah/microservice
+    container_name: microservice
+    ports:
+      - "8079:8079"
+    depends_on:
+      - db
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/match?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - EUREKA_CLIENT_REGISTER-WITH-EUREKA=true   # Register with Eureka
+      - EUREKA_CLIENT_FETCH-REGISTRY=true        # Fetch the registry from Eureka
+    networks:
+      - microservices-net
+
+  # API Gateway
+  API-gateway:
+    build:
+      context: ./API-gateway
+      dockerfile: Dockerfile
+    image: firasbessalah/api5sae3
+    container_name: API-gateway
+    ports:
+      - "8090:8090"  # Expose API Gateway on port 8090
+    depends_on:
+      - eureka-server
+      - microservice
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - EUREKA_CLIENT_REGISTER-WITH-EUREKA=true   # Register with Eureka
+      - EUREKA_CLIENT_FETCH-REGISTRY=true        # Fetch the registry from Eureka
+    networks:
+      - microservices-net
+
+networks:
+  microservices-net:
+    driver: bridge
+
+volumes:
+  db_mysql:
