@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: player-service
+  datasource:
+    username: player-service
+    password:
+    url: jdbc:h2:file:/opt/app/database/playerdb;DB_CLOSE_ON_EXIT=FALSE;IFEXISTS=FALSE
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+  h2:
+    console:
+      enabled: true
+      settings:
+        web-allow-others: true
+      path: /h2-console
+  ssl:
+    ignore-ssl-errors: true
+
+server:
+  port: 8077
+  servlet:
+    context-path: ""
+welcome:
+  message: Welcome to match
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+    healthcheck:
+      enabled: false
+  instance:
+    prefer-ip-address: true
+    hostname: eureka
+    instance-id: "${spring.application.name}:${server.port}"
+    statusPageUrl: http://localhost:8077/players/all
+    healthCheckUrl: http://localhost:8077/actuator/health
+    homePageUrl: "http://${eureka.instance.hostname}:${server.port}${server.servlet.context-path}/players/all"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+  info:
+    env:
+      enabled: true
+    java:
+      enabled: true
+    os:
+      enabled: true
+

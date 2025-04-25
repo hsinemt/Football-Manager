@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="ProjectRootManager">
+  <component name="ExternalStorageConfigurationManager" enabled="true" />
+  <component name="MavenProjectsManager">
+    <option name="originalFiles">
+      <list>
+        <option value="$PROJECT_DIR$/microserv  a5er version/match/pom.xml" />
+        <option value="$PROJECT_DIR$/microserv  a5er version/Football/pom.xml" />
+        <option value="$PROJECT_DIR$/microserv  a5er version/API-gateway/pom.xml" />
+        <option value="$PROJECT_DIR$/microserv  a5er version/microservice/pom.xml" />
+        <option value="$PROJECT_DIR$/microserv  a5er version/eureka-server/pom.xml" />
+        <option value="$PROJECT_DIR$/microserv  a5er version/microservice az/pom.xml" />
+        <option value="$PROJECT_DIR$/microserv  a5er version/microservice sf/pom.xml" />
+        <option value="$PROJECT_DIR$/microserv  a5er version/Serveur-configuration/pom.xml" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="corretto-17" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="microservice (1)" />
+        <module name="microservice (2)" />
+        <module name="microservice" />
+        <module name="Serveur-configuration" />
+        <module name="api-gateway" />
+        <module name="eureka-server" />
+        <module name="nomPrenomClasseExamen" />
+      </profile>
+      <profile name="Annotation profile for Football" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar" />
+        </processorPath>
+        <module name="Football" />
+      </profile>
+    </annotationProcessing>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="Football" options="-parameters" />
+      <module name="Serveur-configuration" options="-parameters" />
+      <module name="api-gateway" options="-parameters" />
+      <module name="eureka-server" options="-parameters" />
+      <module name="microservice" options="-parameters" />
+      <module name="microservice (1)" options="-parameters" />
+      <module name="microservice (2)" options="-parameters" />
+      <module name="nomPrenomClasseExamen" options="-parameters" />
+    </option>
+  </component>
+</project>

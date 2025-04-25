@@ -1,0 +1,5 @@
+{
+    "mongo":{
+           "uri": "mongodb://root:root@mongodb:27017/manager?authSource=admin"
+    }
+}

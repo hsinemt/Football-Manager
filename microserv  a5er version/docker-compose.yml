@@ -1,0 +1,355 @@
+version: '3.8'
+
+services:
+  # Config Server
+  config-server:
+    build:
+      context: ./Serveur-configuration
+      dockerfile: Dockerfile
+    image: sports-management/config-server:latest
+    container_name: config-server
+    ports:
+      - "8888:8888"
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+    networks:
+      - microservices-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Eureka Server (Service Discovery)
+  eureka-server:
+    build:
+      context: ./eureka-server 
+      dockerfile: Dockerfile
+    image: sports-management/eureka:latest
+    container_name: eureka-server
+    ports:
+      - "8761:8761"  # Expose Eureka dashboard on port 8761
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - EUREKA_CLIENT_REGISTER-WITH-EUREKA=false
+      - EUREKA_CLIENT_FETCH-REGISTRY=false  # Standalone Eureka server
+    networks:
+      - microservices-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MySQL Database
+  db:
+    image: mysql:8.0
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    restart: unless-stopped
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=sports_management
+      - MYSQL_ROOT_HOST=%
+    command: 
+      - --default-authentication-plugin=mysql_native_password  # Use native password auth
+      - --bind-address=0.0.0.0    
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -uroot -proot"]
+      interval: 5s
+      timeout: 10s
+      retries: 10
+    networks:
+      - microservices-net
+    volumes:
+      - db_mysql:/var/lib/mysql  # Persist database data between container restarts
+      - ./init-scripts:/docker-entrypoint-initdb.d  # Mount initialization scripts
+
+  # MongoDB Database (for Manager service)
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    restart: unless-stopped
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=root
+      - MONGO_INITDB_DATABASE=manager
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - microservices-net
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # phpMyAdmin (Database Management Tool)
+  phpmyadmin:
+    container_name: ms_phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    depends_on:
+      - db
+    environment:
+      - PMA_HOST=db
+      - PMA_PORT=3306
+      - PMA_ARBITRARY=1
+      - APACHE_SERVER_NAME=localhost  
+    ports:
+      - "8086:80"  # Expose phpMyAdmin on port 8086
+    restart: unless-stopped
+    networks:
+      - microservices-net
+
+  # Keycloak (Authentication Server)
+  keycloak:
+    image: quay.io/keycloak/keycloak:21.1.1
+    container_name: keycloak
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+      - KC_DB=mysql
+      - KC_DB_URL=jdbc:mysql://db:3306/keycloak
+      - KC_DB_USERNAME=root
+      - KC_DB_PASSWORD=root
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    command: start-dev
+    networks:
+      - microservices-net
+
+  # Competition Service (microservice)
+  competition-service:
+    build:
+      context: ./microservice
+      dockerfile: Dockerfile
+    image: sports-management/competition-service:latest
+    container_name: competition-service
+    ports:
+      - "8077:8077"
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    environment:
+      - SPRING_APPLICATION_NAME=competition-service
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/sports_management?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK-SET-URI=http://keycloak:8080/realms/JobBoardKeycloak/protocol/openid-connect/certs
+    networks:
+      - microservices-net
+
+  # Player Service (microservice az)
+  player-service:
+    build:
+      context: ./microservice az
+      dockerfile: Dockerfile
+    image: sports-management/player-service:latest
+    container_name: player-service
+    ports:
+      - "8076:8076"
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    environment:
+      - SPRING_APPLICATION_NAME=player-service
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/sports_management?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK-SET-URI=http://keycloak:8080/realms/JobBoardKeycloak/protocol/openid-connect/certs
+    networks:
+      - microservices-net
+
+  # Equipe Service (microservice sf)
+  equipe-service:
+    build:
+      context: ./microservice sf
+      dockerfile: Dockerfile
+    image: sports-management/equipe-service:latest
+    container_name: equipe-service
+    ports:
+      - "8075:8075"
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    environment:
+      - SPRING_APPLICATION_NAME=equipe-service
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/sports_management?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK-SET-URI=http://keycloak:8080/realms/JobBoardKeycloak/protocol/openid-connect/certs
+      - SPRING_MAIL_HOST=smtp.gmail.com
+      - SPRING_MAIL_PORT=587
+      - SPRING_MAIL_USERNAME=ousama.sfaxi@gmail.com
+      - SPRING_MAIL_PASSWORD=your_app_password_here
+      - SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH=true
+    networks:
+      - microservices-net
+
+  # Match Service
+  match-service:
+    build:
+      context: ./match
+      dockerfile: Dockerfile
+    image: sports-management/match-service:latest
+    container_name: match-service
+    ports:
+      - "8089:8089"
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    environment:
+      - SPRING_APPLICATION_NAME=match-service
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/sports_management?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK-SET-URI=http://keycloak:8080/realms/JobBoardKeycloak/protocol/openid-connect/certs
+    networks:
+      - microservices-net
+
+  # Football Service
+  football-service:
+    build:
+      context: ./Football
+      dockerfile: Dockerfile
+    image: sports-management/football-service:latest
+    container_name: football-service
+    ports:
+      - "8060:8060"
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+    environment:
+      - SPRING_APPLICATION_NAME=football-service
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/sports_management?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=root
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK-SET-URI=http://keycloak:8080/realms/JobBoardKeycloak/protocol/openid-connect/certs
+      - FACE_RECOGNITION_API_URL=http://face-recognition:5000
+      - OPENWEATHERMAP_API_KEY=04b1c1cdd80f54406dae914815a7cf57
+    networks:
+      - microservices-net
+
+  # Manager Service (Node.js)
+  manager-service:
+    build:
+      context: ./manager/manager
+      dockerfile: Dockerfile
+    image: sports-management/manager-service:latest
+    container_name: manager-service
+    ports:
+      - "3000:3000"
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+    environment:
+      - EUREKA_HOST=eureka-server
+      - EUREKA_PORT=8761
+      - MONGO_URI=mongodb://root:root@mongodb:27017/manager?authSource=admin
+    volumes:
+      - ./manager/manager/config/db.json:/app/config/db.json
+    networks:
+      - microservices-net
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./API-gateway
+      dockerfile: Dockerfile
+    image: sports-management/api-gateway:latest
+    container_name: api-gateway
+    ports:
+      - "8090:8090"  # Expose API Gateway on port 8090
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      competition-service:
+        condition: service_started
+      player-service:
+        condition: service_started
+      equipe-service:
+        condition: service_started
+      match-service:
+        condition: service_started
+      football-service:
+        condition: service_started
+      manager-service:
+        condition: service_started
+      keycloak:
+        condition: service_started
+    environment:
+      - SPRING_APPLICATION_NAME=api-gateway
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-server:8888
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK-SET-URI=http://keycloak:8080/realms/JobBoardKeycloak/protocol/openid-connect/certs
+      - SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER-URI=http://keycloak:8080/realms/JobBoardKeycloak
+      - SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_ISSUER-URI=http://keycloak:8080/realms/JobBoardKeycloak
+      - SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_AUTHORIZATION-URI=http://keycloak:8080/realms/JobBoardKeycloak/protocol/openid-connect/auth
+      - SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_TOKEN-URI=http://keycloak:8080/realms/JobBoardKeycloak/protocol/openid-connect/token
+      - SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_USER-INFO-URI=http://keycloak:8080/realms/JobBoardKeycloak/protocol/openid-connect/userinfo
+      - SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_KEYCLOAK_JWK-SET-URI=http://keycloak:8080/realms/JobBoardKeycloak/protocol/openid-connect/certs
+    networks:
+      - microservices-net
+
+networks:
+  microservices-net:
+    driver: bridge
+
+volumes:
+  db_mysql:
+  mongodb_data:

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/microserv  a5er version/API-gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microserv  a5er version/Football/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microserv  a5er version/Serveur-configuration/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microserv  a5er version/eureka-server/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microserv  a5er version/match/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microserv  a5er version/microservice az/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microserv  a5er version/microservice sf/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/microserv  a5er version/microservice/src/main/java" charset="UTF-8" />
+  </component>
+</project>
